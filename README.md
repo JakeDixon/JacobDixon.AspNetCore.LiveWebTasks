@@ -1,4 +1,5 @@
-# JacobDixon.AspNetCore.LiveSassCompile
+# NOT READY FOR USE
+# JacobDixon.AspNetCore.LiveWebTasks
 Compiles Sass/Scss when files change while the server is running.
 
 ## How To Use

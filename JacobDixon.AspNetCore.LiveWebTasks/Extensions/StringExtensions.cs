@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace JacobDixon.AspNetCore.LiveWebTasks
+namespace JacobDixon.AspNetCore.LiveWebTasks.Exceptions
 {
     /// <summary>
     /// Extensions for the string class adding MatchesBlob and IsNullOrEmpty.

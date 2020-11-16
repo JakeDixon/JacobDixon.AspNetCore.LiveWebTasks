@@ -4,8 +4,16 @@ using System.Text;
 
 namespace JacobDixon.AspNetCore.LiveWebTasks
 {
+    /// <summary>
+    /// Holds file watcher options
+    /// </summary>
     public class FileWatcherOptions
     {
+        /// <summary>
+        /// The name of the task to run when a file is created/updated.
+        /// </summary>
+        public string TaskName { get; set; }
+
         /// <summary>
         /// The source path to watch for file changes.
         /// </summary>

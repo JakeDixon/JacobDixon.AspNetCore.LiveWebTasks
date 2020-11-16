@@ -6,7 +6,7 @@ using System.Text;
 
 namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks
 {
-    public class TaskFactory
+    public class TaskFactory : ITaskFactory
     {
         protected Dictionary<string, Type> _tasks = new Dictionary<string, Type>();
 

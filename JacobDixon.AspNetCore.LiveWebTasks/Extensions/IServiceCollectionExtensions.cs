@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace JacobDixon.AspNetCore.LiveWebTasks
+namespace JacobDixon.AspNetCore.LiveWebTasks.Exceptions
 {
     public static class IServiceCollectionExtensions
     {

@@ -12,10 +12,12 @@ namespace JacobDixon.AspNetCore.LiveWebTasks
     {
         private List<TaskFileWatcher> _sassFileWatchers = new List<TaskFileWatcher>();
         private readonly IOptions<LiveWebTasksOptions> _options;
+        private readonly ITaskFactory _taskFactory;
 
-        public TaskInitialiser(IOptions<LiveWebTasksOptions> options)
+        public TaskInitialiser(IOptions<LiveWebTasksOptions> options, ITaskFactory taskFactory)
         {
             _options = options;
+            _taskFactory = taskFactory;
         }
 
         public void StartFileWatchers()
@@ -24,7 +26,7 @@ namespace JacobDixon.AspNetCore.LiveWebTasks
 
             foreach (var sassFileWatcherOptions in sassFileWatchersOptions)
             {
-                ITask sassCompiler = new SassCompilerTask(sassFileWatcherOptions);
+                ITask task = _taskFactory.GetTask(sassFileWatcherOptions.TaskName, sassFileWatcherOptions);
                 var sassFileWatcher = new TaskFileWatcher(sassFileWatcherOptions, sassCompiler);
                 sassFileWatcher.StartFileWatcher();
                 _sassFileWatchers.Add(sassFileWatcher);

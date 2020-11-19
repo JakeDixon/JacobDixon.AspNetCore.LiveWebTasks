@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace JacobDixon.AspNetCore.LiveWebTasks
+namespace JacobDixon.AspNetCore.LiveWebTasks.Options
 {
+    /// <summary>
+    /// A class holding the options for live web tasks
+    /// </summary>
     public class LiveWebTasksOptions
     {
         /// <summary>
@@ -12,15 +15,15 @@ namespace JacobDixon.AspNetCore.LiveWebTasks
         public const string OptionsName = "LiveWebTasksOptions";
 
         /// <summary>
-        /// A boolean value which controls whether live compile is on (true) or off (false).
+        /// A boolean value which controls whether live web tasks is on (true) or off (false).
         /// Default: false
         /// </summary>
-        public bool EnableLiveCompile { get; set; }
+        public bool Enabled { get; set; }
 
         /// <summary>
         /// The folders to monitor for sass/scss file changes 
         /// and the matching destination folders.
         /// </summary>
-        public List<FileWatcherOptions> TaskFileWatchers { get; set; }
+        public List<FileWatcherOptions> TaskFileWatchers { get; set; } = new List<FileWatcherOptions>();
     }
 }

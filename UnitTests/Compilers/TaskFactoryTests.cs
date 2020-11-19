@@ -1,4 +1,5 @@
 ﻿using JacobDixon.AspNetCore.LiveWebTasks;
+using JacobDixon.AspNetCore.LiveWebTasks.Options;
 using JacobDixon.AspNetCore.LiveWebTasks.Tasks;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace LiveSassCompileUnitTests.Compilers
             factory.Register("sass", typeof(SassCompilerTask));
 
             // Act
-            var compiler = factory.GetTask("sass", new FileWatcherOptions());
+            var compiler = factory.CreateTask("sass", new FileWatcherOptions());
 
             // Assert
             Assert.IsType<SassCompilerTask>(compiler);

@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Sdk;
+using JacobDixon.AspNetCore.LiveWebTasks.Options;
 
 namespace LiveSassCompileUnitTests
 {
@@ -35,7 +36,7 @@ namespace LiveSassCompileUnitTests
             _testDestinationPath = Path.Combine(_testRootPath, "Destination");
             Directory.CreateDirectory(_testDestinationPath);
 
-            _testOptions = new FileWatcherOptions { SourcePath = _testSourcePath, DestinationPath = _testDestinationPath, CompileOnStart = false };
+            _testOptions = new FileWatcherOptions { SourcePath = _testSourcePath, DestinationPath = _testDestinationPath, RunOnStart = false };
         }
 
 
@@ -68,7 +69,7 @@ namespace LiveSassCompileUnitTests
             InitialiseTestEnvironment();
             var compilerMock = new Mock<ITask>();
             compilerMock.Setup(o => o.Run(It.IsAny<string>()));
-            var options = new FileWatcherOptions { SourcePath = _testOptions.SourcePath, CompileOnStart = true };
+            var options = new FileWatcherOptions { SourcePath = _testOptions.SourcePath, RunOnStart = true };
             var sassWatcher = new TaskFileWatcher(options, compilerMock.Object);
 
             // Act

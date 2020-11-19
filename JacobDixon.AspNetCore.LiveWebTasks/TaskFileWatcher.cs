@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using JacobDixon.AspNetCore.LiveWebTasks.Options;
+using JacobDixon.AspNetCore.LiveWebTasks.Extensions;
 
 namespace JacobDixon.AspNetCore.LiveWebTasks
 {

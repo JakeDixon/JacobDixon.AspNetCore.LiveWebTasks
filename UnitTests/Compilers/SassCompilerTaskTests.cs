@@ -1,4 +1,5 @@
-﻿using JacobDixon.AspNetCore.LiveWebTasks.Tasks;
+﻿using JacobDixon.AspNetCore.LiveWebTasks.Options;
+using JacobDixon.AspNetCore.LiveWebTasks.Tasks;
 using LiveSassCompileUnitTests.Compilers;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks.Tests
                 {
                     WriteScssFile(file.SourceLocation, file.FileContent);
                 }
-                FileWatcherOptions options = new FileWatcherOptions() { CompileOnStart = false, DestinationPath = destinationDirectory, SourcePath = sourceDirectory };
+                FileWatcherOptions options = new FileWatcherOptions() { RunOnStart = false, DestinationPath = destinationDirectory, SourcePath = sourceDirectory };
                 ITask compiler = new SassCompilerTask(options);
 
                 // Act

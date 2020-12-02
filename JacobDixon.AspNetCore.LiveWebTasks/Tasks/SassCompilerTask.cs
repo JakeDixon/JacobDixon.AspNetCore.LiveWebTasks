@@ -13,33 +13,36 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks
     /// The SassCompilerTask class. Used to compile SASS and SCSS files from
     /// either a file or directory path.
     /// </summary>
-    public class SassCompilerTask : ITask
+    public class SassCompilerTask : ITask, IFileChangedTask
     {
         private const int _maxRetryAttempts = 2;
         private const string _compileFileExtension = ".css";
         private const int _msDelayBetweenRetries = 100;
-        private FileWatcherOptions _options;
+        private TaskFileWatcherOptions _options;
 
         /// <summary>
         /// Creates a new SassCompilerTask ready to be called when a file changes.
         /// </summary>
         /// <param name="options">The file watcher options. Must have the SourcePath, DestinationPath and FileNameExclusions.</param>
-        public SassCompilerTask(FileWatcherOptions options)
+        public SassCompilerTask(TaskFileWatcherOptions options)
         {
             _options = options;
         }
 
-        /// <summary>
-        /// Runs the compiler methods, (either directory or file).
-        /// </summary>
-        /// <param name="path">The path to compile. (directory or file). 
-        /// Directory compiling is recursive.</param>
+        /// <inheritdoc/>
+        public void FileChanged(object sender, FileSystemEventArgs e)
+        {
+
+        }
+
+        /// <inheritdoc />
         public void Run(string path)
         {
             var fileName = Path.GetFileName(path);
             var isDirectory = Directory.Exists(path);
+            var isExcluded = fileName.MatchesAnyGlob(_options.FileNameExclusions);
 
-            if (isDirectory || string.IsNullOrEmpty(fileName) || IsExcluded(fileName))
+            if (isDirectory || string.IsNullOrEmpty(fileName) || isExcluded)
                 CompileDirectory(_options.SourcePath);
             else
                 CompileFile(path);
@@ -67,7 +70,7 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks
 
             var fileName = Path.GetFileName(filePath);
 
-            if (IsExcluded(fileName))
+            if (fileName.MatchesAnyGlob(_options.FileNameExclusions))
                 return;
 
             var cssFilePath = Path.ChangeExtension(filePath, _compileFileExtension);
@@ -104,22 +107,6 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks
                     Thread.Sleep(_msDelayBetweenRetries);
                 }
             }
-        }
-
-        /// <summary>
-        /// Checks if a filename is excluded from compiling.
-        /// </summary>
-        /// <param name="fileName">The filename to check.</param>
-        /// <returns><c>true</c> if the filename is excluded. Otherwise <c>false</c>.</returns>
-        public bool IsExcluded(string fileName)
-        {
-            foreach (var exclude in _options.FileNameExclusions)
-            {
-                if (fileName.MatchesGlob(exclude))
-                    return true;
-            }
-
-            return false;
         }
     }
 }

@@ -19,7 +19,7 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks
         /// <param name="name">The name of the registered task to create.</param>
         /// <param name="options">The options to pass into it's constructor.</param>
         /// <returns>A new task of the type registered under <paramref name="name"/>.</returns>
-        ITask CreateTask(string name, FileWatcherOptions options);
+        ITask CreateTask(string name, TaskFileWatcherOptions options);
         /// <summary>
         /// Registers a task under the <paramref name="name"/>.
         /// </summary>

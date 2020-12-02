@@ -11,15 +11,15 @@ using Xunit;
 using Xunit.Sdk;
 using JacobDixon.AspNetCore.LiveWebTasks.Options;
 
-namespace LiveSassCompileUnitTests
+namespace LiveWebTasksUnitTests
 {
     public class TaskFileWatcherTests
     {
-        private const string _testDirectoryName = "LiveSassCompileTest.SassFileWatcherTests";
+        private const string _testDirectoryName = "LiveWebTasksTest.TaskFileWatcherTests";
         private string _testRootPath;
         private string _testSourcePath;
         private string _testDestinationPath;
-        private FileWatcherOptions _testOptions;
+        private TaskFileWatcherOptions _testOptions;
 
         private void InitialiseTestEnvironment()
         {
@@ -36,15 +36,29 @@ namespace LiveSassCompileUnitTests
             _testDestinationPath = Path.Combine(_testRootPath, "Destination");
             Directory.CreateDirectory(_testDestinationPath);
 
-            _testOptions = new FileWatcherOptions { SourcePath = _testSourcePath, DestinationPath = _testDestinationPath, RunOnStart = false };
+            _testOptions = new TaskFileWatcherOptions 
+            { 
+                FileNameFilters = new List<string>
+                {
+                    "*.scss",
+                    "*.sass"
+                },
+                FileNameExclusions = new List<string>
+                {
+                    "_*"
+                },
+                SourcePath = _testSourcePath, 
+                DestinationPath = _testDestinationPath, 
+                RunOnStart = false 
+            };
         }
 
 
         [Fact]
-        public void SassFileWatcher_NullSourcePath_ThrowsEmptyStringException()
+        public void TaskFileWatcher_NullSourcePath_ThrowsEmptyStringException()
         {
             // Arrange
-            var options = new FileWatcherOptions { SourcePath = null };
+            var options = new TaskFileWatcherOptions { SourcePath = null };
             var compilerMock = new Mock<ITask>();
 
             // Assert
@@ -52,10 +66,10 @@ namespace LiveSassCompileUnitTests
         }
 
         [Fact]
-        public void SassFileWatcher_EmptyFileNameFilters_ThrowsEmptyArrayException()
+        public void TaskFileWatcher_EmptyFileNameFilters_ThrowsEmptyArrayException()
         {
             // Arrange
-            var options = new FileWatcherOptions { SourcePath = "test", FileNameFilters = new List<string>() };
+            var options = new TaskFileWatcherOptions { SourcePath = "test", DestinationPath = "wwwroot/css", FileNameFilters = new List<string>() };
             var compilerMock = new Mock<ITask>();
 
             // Assert
@@ -69,7 +83,14 @@ namespace LiveSassCompileUnitTests
             InitialiseTestEnvironment();
             var compilerMock = new Mock<ITask>();
             compilerMock.Setup(o => o.Run(It.IsAny<string>()));
-            var options = new FileWatcherOptions { SourcePath = _testOptions.SourcePath, RunOnStart = true };
+            var options = new TaskFileWatcherOptions 
+            { 
+                SourcePath = _testOptions.SourcePath, 
+                DestinationPath = _testOptions.DestinationPath, 
+                FileNameExclusions = _testOptions.FileNameExclusions,
+                FileNameFilters = _testOptions.FileNameFilters,
+                RunOnStart = true 
+            };
             var sassWatcher = new TaskFileWatcher(options, compilerMock.Object);
 
             // Act
@@ -251,7 +272,6 @@ color: blue;
 
                 var compilerMock = new Mock<ITask>();
                 compilerMock.Setup(o => o.Run(It.IsAny<string>()));
-                compilerMock.Setup(o => o.IsExcluded(It.IsAny<string>()));
                 var scssPath = Path.Combine(_testSourcePath, _deleteFileScssFileName);
                 var cssPath = Path.Combine(_testDestinationPath, _deleteFileCssFileName);
                 WriteScssFile(scssPath);

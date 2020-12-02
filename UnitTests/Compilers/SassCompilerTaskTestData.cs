@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace LiveSassCompileUnitTests.Compilers
+namespace LiveWebTasksUnitTests.Compilers
 {
     public class SassCompilerTaskTestDataCollection : IEnumerable<object[]>
     {

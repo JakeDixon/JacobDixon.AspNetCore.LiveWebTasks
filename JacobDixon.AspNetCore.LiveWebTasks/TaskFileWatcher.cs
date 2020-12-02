@@ -10,15 +10,13 @@ using JacobDixon.AspNetCore.LiveWebTasks.Extensions;
 
 namespace JacobDixon.AspNetCore.LiveWebTasks
 {
-    public class TaskFileWatcher
+    public class TaskFileWatcher : FileSystemWatcher
     {
-        private const string _compileFileExtension = ".css";
-        private FileSystemWatcher _fileWatcher;
-        private readonly FileWatcherOptions _options;
+        private readonly TaskFileWatcherOptions _options;
         private Dictionary<string, DateTime> _lastRead = new Dictionary<string, DateTime>();
         private readonly ITask _task;
 
-        public TaskFileWatcher(FileWatcherOptions options, ITask task)
+        public TaskFileWatcher(TaskFileWatcherOptions options, ITask task) : base(options.SourcePath)
         {
             _task = task;
             _options = options;
@@ -31,41 +29,49 @@ namespace JacobDixon.AspNetCore.LiveWebTasks
 
             if (_options.FileNameFilters.Count == 0)
                 throw new EmptyArrayException("FileNameFilters must contain atleast one filter");
+
+            foreach (var filter in _options.FileNameFilters)
+                Filters.Add(filter);
+
+            IncludeSubdirectories = true;
+
+            NotifyFilter = NotifyFilters.LastWrite
+                            | NotifyFilters.FileName
+                            | NotifyFilters.DirectoryName;
+
+            if (_task is IFileChangedTask fileChanged)
+            {
+                Changed += fileChanged.FileChanged;
+            }
         }
 
         public void StartFileWatcher()
         {
-            _fileWatcher = new FileSystemWatcher(_options.SourcePath);
-
-            foreach (var filter in _options.FileNameFilters)
-                _fileWatcher.Filters.Add(filter);
-
-            _fileWatcher.EnableRaisingEvents = true;
-            _fileWatcher.IncludeSubdirectories = true;
-
-            _fileWatcher.NotifyFilter = NotifyFilters.LastWrite
-                                   | NotifyFilters.FileName
-                                   | NotifyFilters.DirectoryName;
-
-            _fileWatcher.Changed += FileWatcher_Changed;
-            _fileWatcher.Created += FileWatcher_Changed;
-            _fileWatcher.Renamed += FileWatcher_Renamed;
-            _fileWatcher.Deleted += FileWatcher_Deleted;
+            //_fileWatcher.Changed += FileWatcher_Changed;
+            //_fileWatcher.Created += FileWatcher_Changed;
+            //_fileWatcher.Renamed += FileWatcher_Renamed;
+            //_fileWatcher.Deleted += FileWatcher_Deleted;
 
             if (_options.RunOnStart)
             {
                 _task.Run(_options.SourcePath);
             }
+
+            if (_options.SubscribeToEvents)
+            {
+                EnableRaisingEvents = true;
+            }
         }
 
         public void StopFileWatcher()
         {
-            _fileWatcher.Changed -= FileWatcher_Changed;
-            _fileWatcher.Created -= FileWatcher_Changed;
-            _fileWatcher.Renamed -= FileWatcher_Renamed;
-            _fileWatcher.EnableRaisingEvents = false;
-            _fileWatcher?.Dispose();
-            _fileWatcher = null;
+            if (_task is IFileChangedTask fileChanged)
+            {
+                Changed += fileChanged.FileChanged;
+            }
+            
+            EnableRaisingEvents = false;
+            Dispose();
         }
 
         private void FileChanged(string filePath)
@@ -85,21 +91,21 @@ namespace JacobDixon.AspNetCore.LiveWebTasks
 
         private void DeleteCompiledFile(string filePath)
         {
-            if (filePath.IsNullOrEmpty())
-                return;
+            //if (filePath.IsNullOrEmpty())
+            //    return;
 
-            var fileName = Path.GetFileName(filePath);
-            if (_task.IsExcluded(fileName))
-                _task.Run(_options.SourcePath);
+            //var fileName = Path.GetFileName(filePath);
+            //if (_task.IsExcluded(fileName))
+            //    _task.Run(_options.SourcePath, IsExcluded);
 
-            var cssFilePath = Path.ChangeExtension(filePath, _compileFileExtension);
-            var relativePath = Path.GetRelativePath(_options.SourcePath, cssFilePath);
-            var destinationPath = Path.Combine(_options.DestinationPath, relativePath);
+            //var cssFilePath = Path.ChangeExtension(filePath, _compileFileExtension);
+            //var relativePath = Path.GetRelativePath(_options.SourcePath, cssFilePath);
+            //var destinationPath = Path.Combine(_options.DestinationPath, relativePath);
 
-            if (File.Exists(destinationPath))
-            {
-                File.Delete(destinationPath);
-            }
+            //if (File.Exists(destinationPath))
+            //{
+            //    File.Delete(destinationPath);
+            //}
         }
 
         private void FileWatcher_Renamed(object sender, RenamedEventArgs e)
@@ -116,6 +122,24 @@ namespace JacobDixon.AspNetCore.LiveWebTasks
         private void FileWatcher_Deleted(object sender, FileSystemEventArgs e)
         {
             DeleteCompiledFile(e.FullPath);
+        }
+
+
+
+        /// <summary>
+        /// Checks if a filename is excluded from compiling.
+        /// </summary>
+        /// <param name="fileName">The filename to check.</param>
+        /// <returns><c>true</c> if the filename is excluded. Otherwise <c>false</c>.</returns>
+        public bool IsExcluded(string fileName)
+        {
+            foreach (var exclude in _options.FileNameExclusions)
+            {
+                if (fileName.MatchesGlob(exclude))
+                    return true;
+            }
+
+            return false;
         }
     }
 }

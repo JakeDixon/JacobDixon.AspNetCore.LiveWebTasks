@@ -1,4 +1,6 @@
-﻿namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks
+﻿using System;
+
+namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks
 {
     /// <summary>
     /// Defines the standard methods expected on a Task object. Used for registering
@@ -11,6 +13,5 @@
         /// </summary>
         /// <param name="path">The path to the file that has changed</param>
         void Run(string path);
-        bool IsExcluded(string fileName);
     }
 }

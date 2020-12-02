@@ -24,6 +24,6 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Options
         /// The folders to monitor for sass/scss file changes 
         /// and the matching destination folders.
         /// </summary>
-        public List<FileWatcherOptions> TaskFileWatchers { get; set; } = new List<FileWatcherOptions>();
+        public List<TaskFileWatcherOptions> TaskFileWatchers { get; set; } = new List<TaskFileWatcherOptions>();
     }
 }

@@ -7,7 +7,7 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Options
     /// <summary>
     /// Holds file watcher options
     /// </summary>
-    public class FileWatcherOptions
+    public class TaskFileWatcherOptions
     {
         /// <summary>
         /// The name of the task to run when a file is created/updated.
@@ -41,6 +41,11 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Options
         /// Default: true
         /// </summary>
         public bool RunOnStart { get; set; } = true;
+
+        /// <summary>
+        /// Should the file watcher subscribe to file change events?
+        /// </summary>
+        public bool SubscribeToEvents { get; set; } = true;
 
         /// <summary>
         /// A dictionary of additional options to make available to the task.

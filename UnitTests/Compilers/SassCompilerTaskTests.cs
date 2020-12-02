@@ -1,6 +1,7 @@
-﻿using JacobDixon.AspNetCore.LiveWebTasks.Options;
+﻿using JacobDixon.AspNetCore.LiveWebTasks.Extensions;
+using JacobDixon.AspNetCore.LiveWebTasks.Options;
 using JacobDixon.AspNetCore.LiveWebTasks.Tasks;
-using LiveSassCompileUnitTests.Compilers;
+using LiveWebTasksUnitTests.Compilers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,7 +27,19 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks.Tests
                 {
                     WriteScssFile(file.SourceLocation, file.FileContent);
                 }
-                FileWatcherOptions options = new FileWatcherOptions() { RunOnStart = false, DestinationPath = destinationDirectory, SourcePath = sourceDirectory };
+                TaskFileWatcherOptions options = new TaskFileWatcherOptions() {
+                    RunOnStart = false,
+                    FileNameFilters = new List<string>
+                    {
+                        "*.scss",
+                        "*.sass"
+                    },
+                    FileNameExclusions = new List<string>
+                    {
+                        "_*"
+                    },
+                    DestinationPath = destinationDirectory, 
+                    SourcePath = sourceDirectory };
                 ITask compiler = new SassCompilerTask(options);
 
                 // Act
@@ -34,7 +47,7 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks.Tests
 
                 foreach(var file in filesToCreate)
                 {
-                    if (compiler.IsExcluded(Path.GetFileName(file.SourceLocation)))
+                    if (Path.GetFileName(file.SourceLocation).MatchesAnyGlob(options.FileNameExclusions))
                         fileExists = !File.Exists(file.DestinationLocation);
                     else
                         fileExists = File.Exists(file.DestinationLocation);

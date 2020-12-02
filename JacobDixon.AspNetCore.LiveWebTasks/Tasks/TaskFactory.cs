@@ -23,7 +23,7 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks
         /// <param name="name">The name of the task to create. Must be registered already.</param>
         /// <param name="options">The options to create the task with.</param>
         /// <returns>A task that implements <see cref="ITask"/></returns>
-        public ITask CreateTask(string name, FileWatcherOptions options)
+        public ITask CreateTask(string name, TaskFileWatcherOptions options)
         {
             if (_tasks.ContainsKey(name))
             {
@@ -42,7 +42,7 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks
         /// Registers the task with that name.
         /// </summary>
         /// <param name="name">The name of the task to register</param>
-        /// <param name="type">The type of task to create when <see cref="CreateTask(string, FileWatcherOptions)"/> is called</param>
+        /// <param name="type">The type of task to create when <see cref="CreateTask(string, TaskFileWatcherOptions)"/> is called</param>
         /// <exception cref="TaskNameConflictException">Name conflict already registered type</exception>
         public void Register(string name, Type type)
         {

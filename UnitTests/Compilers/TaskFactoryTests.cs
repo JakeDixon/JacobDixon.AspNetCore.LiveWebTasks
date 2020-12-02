@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
-namespace LiveSassCompileUnitTests.Compilers
+namespace LiveWebTasksUnitTests.Compilers
 {
     public class TaskFactoryTests
     {
@@ -18,7 +18,7 @@ namespace LiveSassCompileUnitTests.Compilers
             factory.Register("sass", typeof(SassCompilerTask));
 
             // Act
-            var compiler = factory.CreateTask("sass", new FileWatcherOptions());
+            var compiler = factory.CreateTask("sass", new TaskFileWatcherOptions());
 
             // Assert
             Assert.IsType<SassCompilerTask>(compiler);

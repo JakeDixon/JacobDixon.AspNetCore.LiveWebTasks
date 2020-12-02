@@ -2,15 +2,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>JacobDixon.AspNetCore.LiveSassCompile</RootNamespace>
+    <RootNamespace>JacobDixon.AspNetCore.LiveWebTasks</RootNamespace>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <Authors>Jacob Dixon</Authors>
-    <Description>Live SASS compile sets up file watchers to automatically build SASS changes while the server is running.</Description>
+    <Description>Live Web Tasks provides an extendable way of triggering actions when files change, are deleted or renamed. One of it's key uses is to auto compile SASS upon file change while the server is running.</Description>
     <PackageId>JacobDixon.AspNetCore.LiveSassCompile</PackageId>
-    <PackageTags>SASS Compile;SCSS Compile;SASS;SCSS;Live Compile;SASS Live Compile;SCSS Live Compile</PackageTags>
-    <PackageProjectUrl>https://github.com/JakeDixon/JacobDixon.AspNetCore.LiveSassCompile</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/JakeDixon/JacobDixon.AspNetCore.LiveSassCompile</RepositoryUrl>
+    <PackageTags>Live Web Tasks;SASS;SCSS;Compile;File Moves;File Copies</PackageTags>
+    <PackageProjectUrl>https://github.com/JakeDixon/JacobDixon.AspNetCore.LiveWebTasks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/JakeDixon/JacobDixon.AspNetCore.LiveWebTasks</RepositoryUrl>
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>

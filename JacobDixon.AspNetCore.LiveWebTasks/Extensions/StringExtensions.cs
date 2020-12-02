@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace JacobDixon.AspNetCore.LiveWebTasks.Extensions
 {
@@ -29,6 +30,23 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Extensions
         public static bool IsNullOrEmpty(this string str)
         {
             return string.IsNullOrEmpty(str);
+        }
+
+        /// <summary>
+        /// Compares a string against an <see cref="IEnumerable{T}"/> of globs.
+        /// </summary>
+        /// <param name="str">The string.</param>
+        /// <param name="globs">The enumerable collection of globs to test the string against.</param>
+        /// <returns><c>true</c> if the string matches any of the globs, otherwise <c>false</c>.</returns>
+        public static bool MatchesAnyGlob(this string str, IEnumerable<string> globs)
+        {
+            foreach (var glob in globs)
+            {
+                if (str.MatchesGlob(glob))
+                    return true;
+            }
+
+            return false;
         }
     }
 }

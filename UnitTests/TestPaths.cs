@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using Xunit.Sdk;
 
-namespace LiveSassCompileUnitTests
+namespace LiveWebTasksUnitTests
 {
     public static class TestPaths
     {

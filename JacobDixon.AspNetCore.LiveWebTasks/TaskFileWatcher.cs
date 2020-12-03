@@ -16,13 +16,15 @@ namespace JacobDixon.AspNetCore.LiveWebTasks
         private Dictionary<string, DateTime> _lastRead = new Dictionary<string, DateTime>();
         private readonly ITask _task;
 
+        private Action<object, FileSystemEventArgs> _fileCreated;
+        private Action<object, FileSystemEventArgs> _fileChanged;
+        private Action<object, RenamedEventArgs> _fileRenamed;
+        private Action<object, FileSystemEventArgs> _fileDeleted;
+
         public TaskFileWatcher(TaskFileWatcherOptions options, ITask task) : base(options.SourcePath)
         {
             _task = task;
             _options = options;
-
-            if (string.IsNullOrEmpty(_options.SourcePath))
-                throw new EmptyStringException("SourcePath option must not be empty or null");
 
             if (string.IsNullOrEmpty(_options.DestinationPath))
                 throw new EmptyStringException("DestinationPath option must not be empty or null");
@@ -39,19 +41,34 @@ namespace JacobDixon.AspNetCore.LiveWebTasks
                             | NotifyFilters.FileName
                             | NotifyFilters.DirectoryName;
 
+            if (_task is IFileCreatedTask fileCreated)
+            {
+               _fileCreated = fileCreated.FileCreated;
+            }
+
             if (_task is IFileChangedTask fileChanged)
             {
-                Changed += fileChanged.FileChanged;
+                _fileChanged = fileChanged.FileChanged;
             }
+
+            if (_task is IFileRenamedTask fileRenamed)
+            {
+                _fileRenamed = fileRenamed.FileRenamed;
+            }
+
+            if (_task is IFileDeletedTask fileDeleted)
+            {
+                _fileDeleted = fileDeleted.FileDeleted;
+            }
+
+            Created += TaskFileWatcher_Created;
+            Changed += TaskFileWatcher_Changed;
+            Renamed += TaskFileWatcher_Renamed;
+            Deleted += TaskFileWatcher_Deleted;
         }
 
         public void StartFileWatcher()
         {
-            //_fileWatcher.Changed += FileWatcher_Changed;
-            //_fileWatcher.Created += FileWatcher_Changed;
-            //_fileWatcher.Renamed += FileWatcher_Renamed;
-            //_fileWatcher.Deleted += FileWatcher_Deleted;
-
             if (_options.RunOnStart)
             {
                 _task.Run(_options.SourcePath);
@@ -65,28 +82,28 @@ namespace JacobDixon.AspNetCore.LiveWebTasks
 
         public void StopFileWatcher()
         {
-            if (_task is IFileChangedTask fileChanged)
-            {
-                Changed += fileChanged.FileChanged;
-            }
-            
+            Created -= TaskFileWatcher_Created;
+            Changed -= TaskFileWatcher_Changed;
+            Renamed -= TaskFileWatcher_Renamed;
+            Deleted -= TaskFileWatcher_Deleted;
+
             EnableRaisingEvents = false;
             Dispose();
         }
 
-        private void FileChanged(string filePath)
+        private bool HasFileChangedSinceLastRun(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
-                return;
+                return false;
 
             var lastWriteTime = File.GetLastWriteTime(filePath);
 
-            if (!_lastRead.ContainsKey(filePath) || _lastRead[filePath] < lastWriteTime)
-            {
-                _task.Run(filePath);
+            if (_lastRead.ContainsKey(filePath) && _lastRead[filePath] > lastWriteTime)
+                return false;
+            
+            _lastRead[filePath] = DateTime.Now;
 
-                _lastRead[filePath] = DateTime.Now;
-            }
+            return true;
         }
 
         private void DeleteCompiledFile(string filePath)
@@ -108,23 +125,30 @@ namespace JacobDixon.AspNetCore.LiveWebTasks
             //}
         }
 
-        private void FileWatcher_Renamed(object sender, RenamedEventArgs e)
+        private void TaskFileWatcher_Created(object sender, FileSystemEventArgs e)
         {
-            DeleteCompiledFile(e.OldFullPath);
-            FileChanged(e.FullPath);
+            if (HasFileChangedSinceLastRun(e.FullPath))
+                _fileCreated?.Invoke(sender, e);
         }
 
-        private void FileWatcher_Changed(object sender, FileSystemEventArgs e)
+        private void TaskFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            FileChanged(e.FullPath);
+            if (HasFileChangedSinceLastRun(e.FullPath))
+                _fileChanged?.Invoke(sender, e);
         }
 
-        private void FileWatcher_Deleted(object sender, FileSystemEventArgs e)
+        private void TaskFileWatcher_Renamed(object sender, RenamedEventArgs e)
         {
-            DeleteCompiledFile(e.FullPath);
+            _lastRead.Remove(e.OldFullPath);
+            if (HasFileChangedSinceLastRun(e.FullPath))
+                _fileRenamed?.Invoke(sender, e);
         }
 
-
+        private void TaskFileWatcher_Deleted(object sender, FileSystemEventArgs e)
+        {
+            _lastRead.Remove(e.FullPath);
+            _fileDeleted?.Invoke(sender, e);
+        }
 
         /// <summary>
         /// Checks if a filename is excluded from compiling.

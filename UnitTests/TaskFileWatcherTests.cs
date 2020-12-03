@@ -53,24 +53,28 @@ namespace LiveWebTasksUnitTests
             };
         }
 
-
-        [Fact]
-        public void TaskFileWatcher_NullSourcePath_ThrowsEmptyStringException()
-        {
-            // Arrange
-            var options = new TaskFileWatcherOptions { SourcePath = null };
-            var compilerMock = new Mock<ITask>();
-
-            // Assert
-            Assert.Throws<EmptyStringException>(() => new TaskFileWatcher(options, compilerMock.Object));
-        }
-
         [Fact]
         public void TaskFileWatcher_EmptyFileNameFilters_ThrowsEmptyArrayException()
         {
-            // Arrange
-            var options = new TaskFileWatcherOptions { SourcePath = "test", DestinationPath = "wwwroot/css", FileNameFilters = new List<string>() };
+            TaskFileWatcherOptions options;
             var compilerMock = new Mock<ITask>();
+            try
+            {
+                // Arrange
+                InitialiseTestEnvironment();
+                options = new TaskFileWatcherOptions
+                {
+                    SourcePath = _testOptions.SourcePath,
+                    DestinationPath = _testOptions.DestinationPath,
+                    FileNameFilters = new List<string>(),
+                    RunOnStart = false
+                    // TODO: need to assert before the clean up happens so that the folders are still there.
+                };
+            }
+            finally
+            {
+                CleanUpTestEnvironment();
+            }
 
             // Assert
             Assert.Throws<EmptyArrayException>(() => new TaskFileWatcher(options, compilerMock.Object));
@@ -126,14 +130,15 @@ namespace LiveWebTasksUnitTests
         }
 
         [Fact]
-        public void StartFileWatcher_FileCreated_CreatesDestinationFile()
+        public void TaskFileWatcher_FileCreated_CallFileCreatedMethod()
         {
             var compilerMock = new Mock<ITask>();
+            var fileCreatedMock = compilerMock.As<IFileCreatedTask>();
             try
             {
                 // Arrange
                 InitialiseTestEnvironment();
-                compilerMock.Setup(o => o.Run(It.IsAny<string>()));
+                fileCreatedMock.Setup(o => o.FileCreated(It.IsAny<object>(), It.IsAny<FileSystemEventArgs>()));
                 var watcher = new TaskFileWatcher(_testOptions, compilerMock.Object);
                 watcher.StartFileWatcher();
 
@@ -149,21 +154,21 @@ namespace LiveWebTasksUnitTests
                 CleanUpTestEnvironment();
             }
             // Assert
-            compilerMock.Verify(o => o.Run(It.IsAny<string>()), Times.Once);
+            fileCreatedMock.Verify(o => o.FileCreated(It.IsAny<object>(), It.IsAny<FileSystemEventArgs>()), Times.Once);
         }
 
         [Fact]
-        public void StartFileWatcher_FileUpdated_UpdatesDestinationFile()
+        public void TaskFileWatcher_FileUpdated_CallsFileUpdatedMethod()
         {
             var compilerMock = new Mock<ITask>();
-
+            var fileChangedMock = compilerMock.As<IFileChangedTask>();
             try
             {
                 // Arrange
                 InitialiseTestEnvironment();
                 string _updateContentsScssFileName = "update.scss";
 
-                compilerMock.Setup(o => o.Run(It.IsAny<string>()));
+                fileChangedMock.Setup(o => o.FileChanged(It.IsAny<object>(), It.IsAny<FileSystemEventArgs>()));
                 WriteScssFile(Path.Combine(_testSourcePath, _updateContentsScssFileName));
                 var watcher = new TaskFileWatcher(_testOptions, compilerMock.Object);
                 watcher.StartFileWatcher();
@@ -182,13 +187,14 @@ color: blue;
                 CleanUpTestEnvironment();
             }
             // Assert
-            compilerMock.Verify(o => o.Run(It.IsAny<string>()), Times.Once);
+            fileChangedMock.Verify(o => o.FileChanged(It.IsAny<object>(), It.IsAny<FileSystemEventArgs>()), Times.Once);
         }
 
         [Fact]
-        public void StartFileWatcher_FileRenamed_CreatesNewDestinationFile()
+        public void TaskFileWatcher_FileRenamed_CallsFileRenamedMethod()
         {
             var compilerMock = new Mock<ITask>();
+            var fileRenamedMock = compilerMock.As<IFileRenamedTask>();
             try
             {
                 // Arrange
@@ -196,7 +202,7 @@ color: blue;
                 string _renameFileScssOldFileName = "rename.scss";
                 string _renameFileScssNewFileName = "renameNew.scss";
 
-                compilerMock.Setup(o => o.Run(It.IsAny<string>()));
+                fileRenamedMock.Setup(o => o.FileRenamed(It.IsAny<object>(), It.IsAny<RenamedEventArgs>()));
                 WriteScssFile(Path.Combine(_testSourcePath, _renameFileScssOldFileName));
                 var watcher = new TaskFileWatcher(_testOptions, compilerMock.Object);
                 watcher.StartFileWatcher();
@@ -216,53 +222,14 @@ color: blue;
                 CleanUpTestEnvironment();
             }
             // Assert
-            compilerMock.Verify(o => o.Run(It.IsAny<string>()), Times.Once);
+            fileRenamedMock.Verify(o => o.FileRenamed(It.IsAny<object>(), It.IsAny<RenamedEventArgs>()), Times.Once);
         }
 
         [Fact]
-        public void StartFileWatcher_FileRenamed_DeletesOldDestinationFile()
+        public void TaskFileWatcher_FileDeleted_CallsFileDeletedMethod()
         {
-            bool fileExists = true;
             var compilerMock = new Mock<ITask>();
-            string _renameFileScssOldFileName = "renameOldDeleted.scss";
-            string _renameFileCssOldFileName = "renameOldDeleted.css";
-            string _renameFileScssNewFileName = "renameNewOldDeleted.scss";
-
-            try
-            {
-                // Arrange
-                InitialiseTestEnvironment();
-
-                compilerMock.Setup(o => o.Run(It.IsAny<string>()));
-                var oldPath = Path.Combine(_testSourcePath, _renameFileScssOldFileName);
-                WriteScssFile(oldPath);
-                WriteScssFile(Path.Combine(_testDestinationPath, _renameFileCssOldFileName));
-                var watcher = new TaskFileWatcher(_testOptions, compilerMock.Object);
-                watcher.StartFileWatcher();
-
-                // Act
-                var newPath = Path.Combine(_testSourcePath, _renameFileScssNewFileName);
-                File.Move(oldPath, newPath);
-
-                // Give the file system a second to catch up
-                Thread.Sleep(200);
-
-                watcher.StopFileWatcher();
-                fileExists = File.Exists(Path.Combine(_testDestinationPath, _renameFileCssOldFileName));
-            }
-            finally
-            {
-                CleanUpTestEnvironment();
-            }
-            // Assert
-            compilerMock.Verify(o => o.Run(It.IsAny<string>()), Times.Once);
-            Assert.False(fileExists);
-        }
-
-        [Fact]
-        public void StartFileWatcher_FileDeleted_DeletesDestinationFile()
-        {
-            bool fileExists = true;
+            var fileDeletedMock = compilerMock.As<IFileDeletedTask>();
             try
             {
                 // Arrange
@@ -270,8 +237,7 @@ color: blue;
                 string _deleteFileScssFileName = "delete.scss";
                 string _deleteFileCssFileName = "delete.css";
 
-                var compilerMock = new Mock<ITask>();
-                compilerMock.Setup(o => o.Run(It.IsAny<string>()));
+                fileDeletedMock.Setup(o => o.FileDeleted(It.IsAny<object>(), It.IsAny<FileSystemEventArgs>()));
                 var scssPath = Path.Combine(_testSourcePath, _deleteFileScssFileName);
                 var cssPath = Path.Combine(_testDestinationPath, _deleteFileCssFileName);
                 WriteScssFile(scssPath);
@@ -286,7 +252,6 @@ color: blue;
                 Thread.Sleep(200);
 
                 watcher.StopFileWatcher();
-                fileExists = File.Exists(cssPath);
             }
             finally
             {
@@ -294,7 +259,7 @@ color: blue;
             }
 
             // Assert
-            Assert.False(fileExists);
+            fileDeletedMock.Verify(o => o.FileDeleted(It.IsAny<object>(), It.IsAny<FileSystemEventArgs>()), Times.Once);
         }
 
         private void CleanUpTestEnvironment()

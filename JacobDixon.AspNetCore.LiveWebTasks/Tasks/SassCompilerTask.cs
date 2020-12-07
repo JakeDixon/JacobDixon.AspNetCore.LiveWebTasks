@@ -13,7 +13,7 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks
     /// The SassCompilerTask class. Used to compile SASS and SCSS files from
     /// either a file or directory path.
     /// </summary>
-    public class SassCompilerTask : ITask, IFileChangedTask
+    public class SassCompilerTask : ITask, IFileChangedTask, IFileCreatedTask, IFileRenamedTask, IFileDeletedTask
     {
         private const int _maxRetryAttempts = 2;
         private const string _compileFileExtension = ".css";
@@ -35,15 +35,32 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks
 
         }
 
+        public void FileCreated(object sender, FileSystemEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FileDeleted(object sender, FileSystemEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FileRenamed(object sender, RenamedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <inheritdoc />
         public void Run(string path)
         {
-            var fileName = Path.GetFileName(path);
+            var fileName = Path.GetFileName(path) ?? throw new ArgumentNullException(nameof(path));
             var isDirectory = Directory.Exists(path);
             var isExcluded = fileName.MatchesAnyGlob(_options.FileNameExclusions);
 
-            if (isDirectory || string.IsNullOrEmpty(fileName) || isExcluded)
+            if (isExcluded)
                 CompileDirectory(_options.SourcePath);
+            else if (isDirectory)
+                CompileDirectory(path);
             else
                 CompileFile(path);
         }

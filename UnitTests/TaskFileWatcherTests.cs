@@ -68,16 +68,21 @@ namespace LiveWebTasksUnitTests
                     DestinationPath = _testOptions.DestinationPath,
                     FileNameFilters = new List<string>(),
                     RunOnStart = false
-                    // TODO: need to assert before the clean up happens so that the folders are still there.
                 };
+
+                // Has to be constructed before the clean up happens so that the folders are still there.
+                var taskFileWatcher = new TaskFileWatcher(options, compilerMock.Object);
+            }
+            catch (EmptyArrayException ex)
+            {
+                // Assert
+                Assert.IsType<EmptyArrayException>(ex);
             }
             finally
             {
                 CleanUpTestEnvironment();
             }
 
-            // Assert
-            Assert.Throws<EmptyArrayException>(() => new TaskFileWatcher(options, compilerMock.Object));
         }
 
         [Fact]

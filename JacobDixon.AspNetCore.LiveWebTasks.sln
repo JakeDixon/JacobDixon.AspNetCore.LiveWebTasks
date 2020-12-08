@@ -15,6 +15,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B8D8D0B8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveWebTasksUnitTests", "UnitTests\LiveWebTasksUnitTests.csproj", "{128F22B3-36A5-4495-9A52-A2FF2AF64F6D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{92E0B2CE-65A6-463F-AC36-23A934A96946}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		GitVersion.yml = GitVersion.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

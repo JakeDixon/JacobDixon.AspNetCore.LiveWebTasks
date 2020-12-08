@@ -1,6 +1,7 @@
 ﻿using JacobDixon.AspNetCore.LiveWebTasks.Extensions;
 using JacobDixon.AspNetCore.LiveWebTasks.Options;
 using JacobDixon.AspNetCore.LiveWebTasks.Tasks;
+using LiveWebTasksUnitTests;
 using LiveWebTasksUnitTests.Compilers;
 using System;
 using System.Collections.Generic;
@@ -13,8 +14,6 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks.Tests
 {
     public class SassCompilerTaskTests
     {
-        private string _testRootPath;
-
         [Theory]
         [ClassData(typeof(SassCompilerTaskTestDataCollection))]
         public void Compile(List<SassCompilerTaskTestData> filesToCreate, string sourceDirectory, string destinationDirectory)
@@ -66,8 +65,8 @@ namespace JacobDixon.AspNetCore.LiveWebTasks.Tasks.Tests
 
         private void CleanUpTestEnvironment()
         {
-            if (Directory.Exists(_testRootPath))
-                Directory.Delete(_testRootPath, true);
+            if (Directory.Exists(TestPaths.RootDirectory))
+                Directory.Delete(TestPaths.RootDirectory, true);
         }
 
         private void WriteScssFile(string path, string content = null)

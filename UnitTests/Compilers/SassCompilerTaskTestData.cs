@@ -72,7 +72,7 @@ namespace LiveWebTasksUnitTests.Compilers
                     new SassCompilerTaskTestData {
                         SourceLocation = Path.Combine(sourceDirectory, "styles.scss"),
                         DestinationLocation = Path.Combine(destinationDirectory, "styles.css"),
-                        FileContent = @"@import includes/_background.scss"
+                        FileContent = @"@import 'includes/_background.scss'"
                     },
                     new SassCompilerTaskTestData {
                         SourceLocation = Path.Combine(sourceDirectory, "includes", "_background.scss"),
